@@ -65,6 +65,15 @@
                         </div>
                     @endif
 
+                    @if(count(json_decode($user->skills)) > 0)
+                        <div class="mt-3">
+                            <h6>Skills:</h6>
+                            @foreach(json_decode($user->skills) as $skill)
+                                <span class="badge bg-info text-dark me-1">{{ $skill }}</span>
+                            @endforeach
+                        </div>
+                    @endif
+
                     <!-- Gallery for Orgs -->
                     @if($user->role === 'organization' && count(json_decode($user->gallery)) > 0)
                         <div class="mt-4">
@@ -122,24 +131,26 @@
                     @endforelse
                 </div>
                 <!-- cert -->
-                 <div class="card shadow mt-4">
-                    <div class="card-header bg-info text-white">
-                        <h5>Your Certificates</h5>
+                @if(Auth::user()->role === 'volunteer')
+                    <!-- Certificates Section -->
+                    <div class="card shadow mt-4">
+                        <div class="card-header bg-info text-white">
+                            <h5>Your Certificates</h5>
+                        </div>
+                        <div class="card-body">
+                            @php $certs = \App\Models\Certification::where('user_id', $user->id)->where('approved', true)->get(); @endphp
+                            @forelse($certs as $cert)
+                                <div class="border-bottom pb-3 mb-3">
+                                    <h6>{{ $cert->title }}</h6>
+                                    <small>From: {{ $cert->organization->name }} for "{{ $cert->opportunity->title }}"</small>
+                                    <a href="{{ asset($cert->pdf_path) }}" class="btn btn-sm btn-primary mt-2" target="_blank">Download PDF</a>
+                                </div>
+                            @empty
+                                <p class="text-muted">No certificates yet. Complete more tasks!</p>
+                            @endforelse
+                        </div>
                     </div>
-                    <div class="card-body">
-                        @php $certs = Certification::where('user_id', $user->id)->where('approved', true)->get(); @endphp
-                        @forelse($certs as $cert)
-                            <div class="border-bottom pb-3 mb-3">
-                                <h6>{{ $cert->title }}</h6>
-                                <small>From: {{ $cert->organization->name }} for "{{ $cert->opportunity->title }}"</small>
-                                <a href="{{ asset($cert->pdf_path) }}" class="btn btn-sm btn-primary mt-2" target="_blank">Download PDF</a>
-                            </div>
-                        @empty
-                            <p class="text-muted">No certificates yet. Complete more tasks!</p>
-                        @endforelse
-                    </div>
-                </div>
-                
+                @endif
                 <!-- cert end -->
             </div>
 

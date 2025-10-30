@@ -10,7 +10,18 @@ class OpportunityController extends Controller
 {
     public function index()
     {
-        $opportunities = Opportunity::with('organization', 'volunteer')->get();
+        $query = Opportunity::with('organization', 'volunteer');
+
+        if (Auth::check() && Auth::user()->role === 'volunteer') {
+            $userSkills = json_decode(Auth::user()->skills, true) ?? [];
+            $query->where(function ($q) use ($userSkills) {
+                foreach ($userSkills as $skill) {
+                    $q->orWhere('description', 'LIKE', "%$skill%");
+                }
+            });
+        }
+
+        $opportunities = $query->get();
         return view('opportunities.index', compact('opportunities'));
     }
 
