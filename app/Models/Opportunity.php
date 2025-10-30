@@ -3,10 +3,17 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Models\Testimonial;
+use App\Models\User;
 
 class Opportunity extends Model
 {
-    protected $fillable = ['title', 'description', 'organization_id', 'volunteer_id', 'completed'];
+    protected $fillable = ['title', 'description', 'organization_id', 'volunteer_id', 'completed', 'completed_at', 'points'];
+
+    protected $casts = [
+        'completed' => 'boolean',
+        'completed_at' => 'datetime',
+    ];
 
     public function organization()
     {
@@ -16,5 +23,10 @@ class Opportunity extends Model
     public function volunteer()
     {
         return $this->belongsTo(User::class, 'volunteer_id');
+    }
+
+    public function testimonial()
+    {
+        return $this->hasOne(Testimonial::class, 'opportunity_id');
     }
 }

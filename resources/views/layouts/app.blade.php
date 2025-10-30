@@ -7,28 +7,39 @@
     <link rel="icon" href="{{ asset('favicon.ico') }}" type="image/x-icon">
     <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Optional: Bootstrap Icons -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        /* small theme polish */
+        body { background: #f7f9fb; }
+        .navbar-brand { font-weight:700; letter-spacing: .2px; }
+    </style>
 </head>
 <body class="bg-light">
     <!-- Navbar -->
     <nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm">
         <div class="container">
-            <a class="navbar-brand fw-bold" href="/">Volunteer Platform</a>
-            <div class="navbar-nav ms-auto">
-                <a href="{{ route('profile') }}" class="nav-link">My Profile</a>
-                @auth
-                    <span class="navbar-text me-3 text-white">
-                        {{ Auth::user()->name }} <small class="text-light">({{ ucfirst(Auth::user()->role) }})</small>
-                    </span>
-                    <form method="POST" action="{{ route('logout') }}" class="d-inline">
-                        @csrf
-                        <button type="submit" class="btn btn-outline-light btn-sm">Logout</button>
-                    </form>
-                @else
-                    <a href="{{ route('login') }}" class="btn btn-outline-light me-2">Login</a>
-                    <a href="{{ route('register') }}" class="btn btn-light">Register</a>
-                @endauth
+            <a class="navbar-brand fw-bold" href="{{ route('home') }}">Volunteer Platform</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="mainNav">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                    <li class="nav-item"><a class="nav-link" href="{{ route('opportunities.index') }}">Opportunities</a></li>
+                    @auth
+                        <li class="nav-item"><a class="nav-link" href="{{ route('profile') }}">My Profile</a></li>
+                    @endauth
+                </ul>
+                <div class="d-flex align-items-center">
+                    @auth
+                        <span class="navbar-text me-3 text-white">{{ Auth::user()->name }}</span>
+                        <form method="POST" action="{{ route('logout') }}">
+                            @csrf
+                            <button type="submit" class="btn btn-outline-light btn-sm">Logout</button>
+                        </form>
+                    @else
+                        <a href="{{ route('login') }}" class="btn btn-outline-light me-2">Login</a>
+                        <a href="{{ route('register') }}" class="btn btn-light">Register</a>
+                    @endauth
+                </div>
             </div>
         </div>
     </nav>

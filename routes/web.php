@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\OpportunityController;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Auth;
 
 Route::get('/', function () {
     return view('welcome');
@@ -19,5 +20,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/opportunities/{id}/claim', [OpportunityController::class, 'claim'])->name('opportunities.claim');
     Route::post('/opportunities/{id}/complete', [OpportunityController::class, 'complete'])->name('opportunities.complete');
     Route::post('/opportunities/{id}/approve-cert', [App\Http\Controllers\ProfileController::class, 'approveCertification'])->name('certification.approve');
-    
+    Route::get('/opportunities/{id}/testimonial', [OpportunityController::class, 'showTestimonial'])->name('opportunities.testimonial.form');
+    Route::post('/opportunities/{id}/testimonial', [App\Http\Controllers\OpportunityController::class, 'storeTestimonial'])->name('opportunities.testimonial');
+    Route::get('/certificates/{id}/download', [App\Http\Controllers\ProfileController::class, 'downloadCertificate'])->name('certificates.download');
 });

@@ -3,171 +3,154 @@
 
 @section('content')
 <div class="container">
-    <div class="row">
-        <div class="col-md-4">
-            <!-- Sidebar: Stats & Gallery -->
-            <div class="card shadow">
+    <div class="row g-4">
+        <div class="col-lg-4">
+            <!-- Sidebar -->
+            <div class="card shadow-sm">
                 <div class="card-body text-center">
-                    <div class="avatar bg-primary text-white d-inline-flex align-items-center justify-content-center rounded-circle mb-3"
-                         style="width: 100px; height: 100px; font-size: 2.5rem;">
-                        {{ strtoupper(substr($user->name, 0, 1)) }}
-                    </div>
-                    <h4>{{ $user->name }}</h4>
-                    <p class="text-muted">{{ ucfirst($user->role) }}</p>
+                    <img src="{{ $user->avatar ? asset('storage/' . $user->avatar) : asset('default-avatar.png') }}" class="rounded-circle mb-3" style="width:110px;height:110px;object-fit:cover">
+                    <h5 class="mb-0">{{ $user->name }}</h5>
+                    <small class="text-muted d-block mb-3">{{ ucfirst($user->role) }}</small>
 
-                    @if($user->role === 'organization' && $user->verified)
-                        <span class="badge bg-success mb-2">Verified Organization</span>
-                    @endif
-
-                    @if($user->bio)
-                        <p class="small text-muted">{{ $user->bio }}</p>
-                    @endif
-
-                    <!-- Stats -->
-                    <!-- profile updatecode -->
-                    <form action="{{ route('profile.update') }}" method="POST" enctype="multipart/form-data" class="mt-4">
-                        @csrf @method('PUT')
-                        <div class="mb-3 text-center">
-                            <img src="{{ $user->avatar ? asset('storage/' . $user->avatar) : asset('default-avatar.png') }}" 
-                                class="rounded-circle" style="width: 150px; height: 150px; object-fit: cover;">
-                            <input type="file" name="avatar" class="form-control mt-2" accept="image/*">
-                        </div>
-                        <div class="mb-3">
-                            <label>Skills (comma-separated: coding, teaching, design)</label>
-                            <input type="text" name="skills_input" class="form-control" value="{{ implode(', ', json_decode($user->skills)) }}">
-                        </div>
-                        <button type="submit" class="btn btn-primary">Update Profile</button>
-                    </form>
-                     <!-- profile updatecode -->
-                    <div class="row text-center mt-4">
-                        <div class="col">
-                            <h5 class="fw-bold text-primary">{{ $user->tasks_completed }}</h5>
-                            <small>Tasks Posted/Completed</small>
-                        </div>
-                        <div class="col">
-                            <h5 class="fw-bold text-success">{{ $user->points }}</h5>
-                            <small>Total Impact Points</small>
-                        </div>
+                    <div class="d-grid gap-2">
+                        @if($user->role === 'organization')
+                            <a href="{{ route('opportunities.create') }}" class="btn btn-primary">Post Opportunity</a>
+                        @else
+                            <a href="{{ route('opportunities.index') }}" class="btn btn-primary">Find Opportunities</a>
+                        @endif
+                        <a href="{{ route('profile') }}" class="btn btn-outline-secondary">Refresh Profile</a>
                     </div>
 
-                    <!-- Badges -->
-                    @if(count(json_decode($user->badges)) > 0)
-                        <div class="mt-3">
-                            <h6>Badges:</h6>
-                            @foreach(json_decode($user->badges) as $badge)
-                                <span class="badge bg-warning text-dark me-1">
-                                    @if($badge == 'first_task') First Task
-                                    @elseif($badge == 'hero') Hero
-                                    @elseif($badge == 'legend') Legend
-                                    @endif
-                                </span>
-                            @endforeach
-                        </div>
+                    <hr>
+
+                    <div class="text-start">
+                        <p class="mb-1"><strong>Points</strong></p>
+                        <h3 class="text-success">{{ $user->points }}</h3>
+                        <p class="mb-1"><strong>Tasks</strong></p>
+                        <h3 class="text-primary">{{ $user->tasks_completed }}</h3>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Badges & Skills -->
+            <div class="card mt-3 shadow-sm">
+                <div class="card-body">
+                    @if($user->badges && count(json_decode($user->badges)) > 0)
+                        <h6>Badges</h6>
+                        @foreach(json_decode($user->badges) as $badge)
+                            <span class="badge bg-warning text-dark me-1 mb-1">{{ $badge }}</span>
+                        @endforeach
+                        <hr>
                     @endif
 
-                    @if(count(json_decode($user->skills)) > 0)
-                        <div class="mt-3">
-                            <h6>Skills:</h6>
-                            @foreach(json_decode($user->skills) as $skill)
-                                <span class="badge bg-info text-dark me-1">{{ $skill }}</span>
-                            @endforeach
-                        </div>
-                    @endif
-
-                    <!-- Gallery for Orgs -->
-                    @if($user->role === 'organization' && count(json_decode($user->gallery)) > 0)
-                        <div class="mt-4">
-                            <h6>Gallery</h6>
-                            @foreach(json_decode($user->gallery) as $photo)
-                                <img src="{{ $photo }}" class="img-thumbnail me-1" style="width: 80px; height: 80px; object-fit: cover;">
-                            @endforeach
-                        </div>
+                    @if($user->skills && count(json_decode($user->skills)) > 0)
+                        <h6>Skills</h6>
+                        @foreach(json_decode($user->skills) as $skill)
+                            <span class="badge bg-info text-dark me-1 mb-1">{{ $skill }}</span>
+                        @endforeach
                     @endif
                 </div>
             </div>
         </div>
 
-        <div class="col-md-8">
-            <!-- Main Content: Opportunities -->
-            <div class="card shadow">
-                <div class="card-header bg-primary text-white">
-                    <h5>
-                        @if($user->role === 'organization')
-                            Your Posted Opportunities
-                        @else
-                            Your Completed Tasks
-                        @endif
-                    </h5>
+        <div class="col-lg-8">
+            <!-- Opportunities / Certificates -->
+            <div class="card shadow-sm">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <strong>
+                        @if($user->role === 'organization') Your Posted Opportunities @else Your Tasks @endif
+                    </strong>
+                    <small class="text-muted">{{ $opportunities->count() }} items</small>
                 </div>
                 <div class="card-body">
                     @forelse($opportunities as $opp)
-                        <div class="border-bottom pb-3 mb-3">
-                            <h6 class="fw-bold">{{ $opp->title }}</h6>
-                            <p class="text-muted small">{{ $opp->description }}</p>
-                            @if($user->role === 'organization')
-                                <small>Claimed by: {{ $opp->volunteer?->name ?? 'Not claimed' }}</small>
-                            @else
-                                <small>Posted by: {{ $opp->organization->name }}</small>
-                            @endif
-                            @if($opp->completed)
-                                <span class="badge bg-success ms-2">Completed</span>
-                            @endif
+                        <div class="mb-3 pb-2 border-bottom">
+                            <div class="d-flex justify-content-between">
+                                <div>
+                                    <h6 class="mb-1">{{ $opp->title }}</h6>
+                                    <p class="small text-muted mb-1">{{ Str::limit($opp->description, 140) }}</p>
+                                    <div class="small text-muted">
+                                        @if($user->role === 'organization')
+                                            Claim: {{ $opp->volunteer?->name ?? '—' }}
+                                        @else
+                                            Org: {{ $opp->organization->name }}
+                                        @endif
+                                    </div>
+                                </div>
+                                <div class="text-end">
+                                    @if($opp->completed)
+                                        <span class="badge bg-success mb-2">Completed</span><br>
+                                    @endif
 
-                            @if($user->role === 'organization' && !$opp->completed && $opp->volunteer_id)
-                                <form action="{{ route('certification.approve', $opp->id) }}" method="POST" class="d-inline">
-                                    @csrf
-                                    <button class="btn btn-sm btn-outline-success">Approve Certificate</button>
-                                </form>
+                                    @if($user->role === 'organization' && $opp->completed && $opp->volunteer_id)
+                                        <form action="{{ route('certification.approve', $opp->id) }}" method="POST" class="d-inline">
+                                            @csrf
+                                            <button class="btn btn-sm btn-outline-success">Approve Cert</button>
+                                        </form>
+                                    @endif
+                                </div>
+                            </div>
+
+                            <!-- For volunteers: quick testimonial button -->
+                            @if($user->role === 'volunteer' && $opp->completed)
+                                <div class="mt-2">
+                                    @if($opp->testimonial)
+                                        <small class="text-muted">You submitted a testimonial.</small>
+                                    @else
+                                        <a href="{{ route('opportunities.testimonial.form', $opp->id) }}" class="btn btn-sm btn-light">Leave Feedback</a>
+                                    @endif
+                                </div>
                             @endif
                         </div>
                     @empty
-                        <p class="text-muted text-center py-4">
-                            @if($user->role === 'organization')
-                                No opportunities posted yet. <a href="{{ route('opportunities.create') }}">Post one now!</a>
-                            @else
-                                No tasks completed yet. <a href="{{ route('opportunities.index') }}">Find opportunities</a>
-                            @endif
-                        </p>
+                        <p class="text-center text-muted py-4">No items yet.</p>
                     @endforelse
                 </div>
-                <!-- cert -->
-                @if(Auth::user()->role === 'volunteer')
-                    <!-- Certificates Section -->
-                    <div class="card shadow mt-4">
-                        <div class="card-header bg-info text-white">
-                            <h5>Your Certificates</h5>
-                        </div>
-                        <div class="card-body">
-                            @php $certs = \App\Models\Certification::where('user_id', $user->id)->where('approved', true)->get(); @endphp
-                            @forelse($certs as $cert)
-                                <div class="border-bottom pb-3 mb-3">
-                                    <h6>{{ $cert->title }}</h6>
-                                    <small>From: {{ $cert->organization->name }} for "{{ $cert->opportunity->title }}"</small>
-                                    <a href="{{ asset($cert->pdf_path) }}" class="btn btn-sm btn-primary mt-2" target="_blank">Download PDF</a>
-                                </div>
-                            @empty
-                                <p class="text-muted">No certificates yet. Complete more tasks!</p>
-                            @endforelse
-                        </div>
-                    </div>
-                @endif
-                <!-- cert end -->
             </div>
 
-            <!-- Testimonials (for Orgs) -->
-            @if($user->role === 'organization')
-                <div class="card shadow mt-4">
-                    <div class="card-header bg-success text-white">
-                        <h5>Testimonials</h5>
-                    </div>
+            <!-- Certificates -->
+            @if($user->role === 'volunteer' && $certifications->isNotEmpty())
+                <div class="card shadow-sm mt-3">
+                    <div class="card-header"><strong>Your Certificates</strong></div>
                     <div class="card-body">
-                        @forelse($testimonials as $testimonial)
-                            <div class="border-bottom pb-2 mb-2">
-                                <p class="text-muted">"<strong>{{ $testimonial->message }}</strong>"</p>
-                                <small>— {{ $testimonial->volunteer->name }} ({{ $testimonial->rating }}/5 stars)</small>
+                        @foreach($certifications as $cert)
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <div>
+                                    <div class="fw-semibold">{{ $cert->title }}</div>
+                                    <div class="small text-muted">From {{ $cert->organization->name }} — {{ $cert->opportunity->title }}</div>
+                                </div>
+                                <div>
+                                    @if($cert->pdf_path)
+                                        <a href="{{ route('certificates.download', $cert->id) }}" class="btn btn-sm btn-primary">Download PDF</a>
+                                    @else
+                                        <span class="badge bg-secondary">Processing</span>
+                                    @endif
+                                </div>
+                            </div>
+                        @endforeach
+                    </div>
+                </div>
+            @endif
+
+            <!-- Testimonials for Orgs -->
+            @if($user->role === 'organization' && isset($testimonials))
+                <div class="card shadow-sm mt-3">
+                    <div class="card-header"><strong>Testimonials — Avg {{ number_format($averageRating,1) }}/5</strong></div>
+                    <div class="card-body">
+                        @forelse($testimonials as $t)
+                            <div class="mb-3 border-bottom pb-2">
+                                <div class="d-flex justify-content-between">
+                                    <div>
+                                        <strong>{{ $t->volunteer->name }}</strong>
+                                        <div class="small text-muted">{{ $t->comment }}</div>
+                                    </div>
+                                    <div class="text-end">
+                                        <div class="fw-bold">{{ $t->rating }} / 5</div>
+                                    </div>
+                                </div>
                             </div>
                         @empty
-                            <p class="text-muted text-center py-4">No testimonials yet. Complete more tasks to get reviews!</p>
+                            <p class="text-center text-muted">No testimonials yet.</p>
                         @endforelse
                     </div>
                 </div>

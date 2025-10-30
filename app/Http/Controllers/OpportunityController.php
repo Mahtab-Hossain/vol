@@ -2,91 +2,149 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Opportunity;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Schema;
+use App\Models\Opportunity;
+use App\Models\Testimonial;
+use App\Models\User;
 
 class OpportunityController extends Controller
 {
-    public function index()
-    {
-        $query = Opportunity::with('organization', 'volunteer');
+	// List opportunities (simple implementation)
+	public function index()
+	{
+		// eager load relations if available; fall back to simple query
+		$opportunities = Opportunity::with(['organization','volunteer','testimonial'])->paginate(10);
+		return view('opportunities.index', compact('opportunities'));
+	}
 
-        if (Auth::check() && Auth::user()->role === 'volunteer') {
-            $userSkills = json_decode(Auth::user()->skills, true) ?? [];
-            $query->where(function ($q) use ($userSkills) {
-                foreach ($userSkills as $skill) {
-                    $q->orWhere('description', 'LIKE', "%$skill%");
-                }
-            });
-        }
+	// Show create form
+	public function create()
+	{
+		return view('opportunities.create');
+	}
 
-        $opportunities = $query->get();
-        return view('opportunities.index', compact('opportunities'));
-    }
+	// Store a new opportunity (minimal validation)
+	public function store(Request $request)
+	{
+		$data = $request->validate([
+			'title' => 'required|string|max:255',
+			'description' => 'required|string',
+		]);
 
-    public function create()
-    {
-        return view('opportunities.create');
-    }
+		$opp = new Opportunity($data);
 
-    public function store(Request $request)
-    {
-        $request->validate([
-            'title' => 'required',
-            'description' => 'required',
-        ]);
+		// persist who posted this opportunity: prefer organization_id if available
+		if (Auth::check()) {
+			if (Schema::hasColumn('opportunities', 'organization_id')) {
+				$opp->organization_id = Auth::id();
+			} elseif (Schema::hasColumn('opportunities', 'user_id')) {
+				// legacy column
+				$opp->user_id = Auth::id();
+			} else {
+				// no known owner column — leave as-is (or handle differently)
+			}
+		}
 
-        Opportunity::create([
-            'title' => $request->title,
-            'description' => $request->description,
-            'organization_id' => Auth::id(),
-        ]);
+		$opp->save();
 
-        return redirect()->route('opportunities.index')->with('success', 'Opportunity posted successfully!');
-    }
+		return redirect()->route('opportunities.index')->with('success', 'Opportunity created.');
+	}
 
-    public function claim($id)
-    {
-        $opp = Opportunity::findOrFail($id);
-        if ($opp->volunteer_id) {
-            return back()->with('error', 'Already claimed');
-        }
-        $opp->update(['volunteer_id' => Auth::id()]);
-        return back()->with('success', 'Claimed!');
-    }
+	// Claim an opportunity (mark as claimed by current user)
+	public function claim($id)
+	{
+		$opp = Opportunity::findOrFail($id);
+		if (! Auth::check()) {
+			return redirect()->route('opportunities.index')->with('error', 'Unauthorized.');
+		}
+		$opp->volunteer_id = Auth::id();
+		$opp->save();
 
-    public function complete($id)
-    {
-        $opp = Opportunity::findOrFail($id);
+		return redirect()->back()->with('success', 'Opportunity claimed.');
+	}
 
-        if ($opp->volunteer_id != Auth::id()) {
-            return back()->with('error', 'You can only complete your own tasks.');
-        }
+	// Mark an opportunity complete
+	public function complete($id)
+	{
+		$opp = Opportunity::findOrFail($id);
 
-        $opp->update(['completed' => true]);
+		// Only the volunteer who claimed it or the organization can mark complete
+		$userId = Auth::id();
+		if ($opp->volunteer_id && $userId !== $opp->volunteer_id && $userId !== $opp->organization_id) {
+			return redirect()->back()->with('error', 'Unauthorized to mark this as complete.');
+		}
 
-        $user = Auth::user();
-        $user->increment('tasks_completed');
-        $user->increment('points', 100);   // 100 points per task
+		$opp->completed = true;
+		$opp->completed_at = now();
+		$opp->save();
 
-        // ---- BADGE LOGIC ----
-        $badges = json_decode($user->badges, true) ?? [];
+		// Award points and increment tasks_completed safely
+		if ($opp->volunteer_id) {
+			$vol = User::find($opp->volunteer_id);
+			if ($vol) {
+				// Points: prefer opportunity-defined points, fallback to 10
+				$pointsAwarded = $opp->points ?? 10;
 
-        if ($user->tasks_completed == 1 && !in_array('first_task', $badges)) {
-            $badges[] = 'first_task';
-        }
-        if ($user->tasks_completed >= 5 && !in_array('hero', $badges)) {
-            $badges[] = 'hero';
-        }
-        if ($user->points >= 1000 && !in_array('legend', $badges)) {
-            $badges[] = 'legend';
-        }
+				if (Schema::hasColumn('users', 'points')) {
+					$vol->points = ($vol->points ?? 0) + $pointsAwarded;
+				}
+				if (Schema::hasColumn('users', 'tasks_completed')) {
+					$vol->tasks_completed = ($vol->tasks_completed ?? 0) + 1;
+				}
+				$vol->save();
+			}
+		}
 
-        $user->badges = json_encode(array_unique($badges));
-        $user->save();
-        // ---------------------
+		return redirect()->back()->with('success', 'Opportunity marked as completed.');
+	}
 
-        return back()->with('success', 'Task completed! +100 points');
-    }
+	// Store a testimonial for an opportunity
+	public function storeTestimonial(Request $request, $id)
+	{
+		$request->validate([
+			'rating' => 'required|integer|min:1|max:5',
+			'comment' => 'nullable|string|max:1000',
+		]);
+
+		$opp = Opportunity::findOrFail($id);
+
+		// Resolve organization id robustly
+		$orgId = $opp->organization_id ?? $opp->user_id ?? null;
+
+		// Prevent duplicate testimonials: update if the volunteer already submitted one for this opportunity
+		$testimonial = Testimonial::where('opportunity_id', $opp->id)
+			->where('volunteer_id', Auth::id())
+			->first();
+
+		$payload = [
+			'opportunity_id' => $opp->id,
+			'volunteer_id' => Auth::id(),
+			'organization_id' => $orgId,
+			'rating' => $request->rating,
+			'comment' => $request->comment,
+		];
+
+		if ($testimonial) {
+			$testimonial->update($payload);
+		} else {
+			Testimonial::create($payload);
+		}
+
+		return back()->with('success', 'Thank you for your feedback.');
+	}
+
+	// Show testimonial form (GET)
+	public function showTestimonial($id)
+	{
+		$opp = Opportunity::with('organization')->findOrFail($id);
+
+		// Only allow volunteer who claimed it (or allow orgs to view as needed)
+		if (! Auth::check() || (Auth::id() !== $opp->volunteer_id && Auth::user()->role !== 'organization')) {
+			abort(403);
+		}
+
+		return view('opportunities.testimonial', compact('opp'));
+	}
 }

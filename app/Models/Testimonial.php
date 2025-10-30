@@ -4,20 +4,14 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class Certification extends Model
+class Testimonial extends Model
 {
     protected $fillable = [
         'opportunity_id',
-        'user_id',
+        'volunteer_id',
         'organization_id',
-        'title',
-        'message',
-        'approved',
-        'pdf_path'
-    ];
-
-    protected $casts = [
-        'approved' => 'boolean',
+        'rating',
+        'comment'
     ];
 
     public function opportunity()
@@ -27,7 +21,7 @@ class Certification extends Model
 
     public function volunteer()
     {
-        return $this->belongsTo(User::class, 'user_id');
+        return $this->belongsTo(User::class, 'volunteer_id');
     }
 
     public function organization()
