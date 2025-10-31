@@ -132,7 +132,8 @@ class OpportunityController extends Controller
 			Testimonial::create($payload);
 		}
 
-		return back()->with('success', 'Thank you for your feedback.');
+		// Redirect volunteer to their profile with success message (per UX request)
+		return redirect()->route('profile')->with('success', 'Thank you for your feedback.');
 	}
 
 	// Show testimonial form (GET)

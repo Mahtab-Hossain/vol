@@ -49,7 +49,53 @@
         @yield('content')
     </main>
 
+    <!-- Global Toast Notifications -->
+    <div aria-live="polite" aria-atomic="true" class="position-fixed top-0 end-0 p-3" style="z-index: 1080;">
+        <div id="globalToast" class="toast align-items-center text-bg-light border-0" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="d-flex">
+                <div class="toast-body" id="globalToastBody">
+                    <!-- message populated by JS -->
+                </div>
+                <button type="button" class="btn-close me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+        </div>
+    </div>
+
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        // Show server-side flash as toast
+        (function() {
+            const toastEl = document.getElementById('globalToast');
+            const toastBody = document.getElementById('globalToastBody');
+            const bsToast = new bootstrap.Toast(toastEl);
+
+            @if(session('success'))
+                toastBody.innerText = @json(session('success'));
+                toastEl.classList.remove('text-bg-light');
+                toastEl.classList.add('text-bg-success');
+                bsToast.show();
+            @elseif(session('error'))
+                toastBody.innerText = @json(session('error'));
+                toastEl.classList.remove('text-bg-light');
+                toastEl.classList.add('text-bg-danger');
+                bsToast.show();
+            @elseif(session('info'))
+                toastBody.innerText = @json(session('info'));
+                toastEl.classList.remove('text-bg-light');
+                toastEl.classList.add('text-bg-primary');
+                bsToast.show();
+            @endif
+
+            // Show validation errors briefly
+            @if($errors->any())
+                toastBody.innerText = "Please review the form — there are errors.";
+                toastEl.classList.remove('text-bg-light');
+                toastEl.classList.add('text-bg-danger');
+                bsToast.show();
+            @endif
+        })();
+    </script>
 </body>
 </html>

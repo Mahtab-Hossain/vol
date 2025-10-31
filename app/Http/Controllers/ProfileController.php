@@ -6,6 +6,7 @@ use App\Models\Opportunity;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\Storage; // added
 use App\Models\Certification;
 use Barryvdh\DomPDF\Facade\Pdf;
 use App\Models\Testimonial;
@@ -113,28 +114,31 @@ class ProfileController extends Controller
     {
         $request->validate([
             'avatar' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
-            'skills_input' => 'nullable|string|max:255',
+            'skills_input' => 'nullable|string|max:1024',
         ]);
 
         $user = Auth::user();
 
         if ($request->hasFile('avatar')) {
-            // Delete old avatar if exists
-            if ($user->avatar && file_exists(storage_path('app/public/' . $user->avatar))) {
-                unlink(storage_path('app/public/' . $user->avatar));
+            // Use the storage facade for portability and safe deletion
+            if ($user->avatar && Storage::disk('public')->exists($user->avatar)) {
+                Storage::disk('public')->delete($user->avatar);
             }
+            // store under public/avatars
             $path = $request->file('avatar')->store('avatars', 'public');
             $user->avatar = $path;
         }
 
         if ($request->has('skills_input')) {
             $skills = array_filter(array_map('trim', explode(',', $request->skills_input)));
-            $user->skills = json_encode($skills);
+            // Save as array — $casts on User will handle JSON serialization
+            $user->skills = array_values($skills);
         }
 
         $user->save();
 
-        return back()->with('success', 'Profile updated successfully!');
+        // Redirect to personal profile so both roles clearly see the updated profile
+        return redirect()->route('profile')->with('success', 'Profile updated successfully!');
     }
 
     public function downloadCertificate($id)

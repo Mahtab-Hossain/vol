@@ -11,7 +11,7 @@
                     <small>Help {{ $opp->organization->name }} get better.</small>
                 </div>
                 <div class="card-body">
-                    <form action="{{ route('opportunities.testimonial', $opp->id) }}" method="POST">
+                    <form action="{{ route('opportunities.testimonial', $opp->id) }}" method="POST" onsubmit="return confirmSubmit()">
                         @csrf
                         <div class="mb-3">
                             <label>Rating (1-5 Stars)</label>
@@ -34,4 +34,10 @@
         </div>
     </div>
 </div>
+
+<script>
+    function confirmSubmit() {
+        return confirm('Submit testimonial? You can edit later if needed.');
+    }
+</script>
 @endsection

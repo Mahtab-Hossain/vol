@@ -6,85 +6,200 @@
     <title>Volunteer Platform - Make a Difference</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Poppins', sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; }
-        .hero { padding: 100px 0; color: white; }
-        .btn-custom { padding: 12px 30px; font-weight: 600; border-radius: 50px; transition: 0.3s; }
-        .btn-primary { background: #4f46e5; border: none; }
-        .btn-primary:hover { background: #4338ca; transform: translateY(-3px); box-shadow: 0 10px 20px rgba(79, 70, 229, 0.3); }
-        .btn-outline-light:hover { background: white; color: #4f46e5; }
-        .feature-card { background: white; border-radius: 15px; padding: 30px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); transition: 0.3s; }
-        .feature-card:hover { transform: translateY(-10px); }
-        .stats { background: rgba(255,255,255,0.1); backdrop-filter: blur(10px); border-radius: 15px; padding: 40px; }
-        .icon-lg { font-size: 3rem; color: #4f46e5; }
-        footer { background: #1a1a2e; color: #aaa; padding: 40px 0; }
+        /* 60/30/10 rule: primary = royal blue (60%), secondary = royal red (30%), accent = gold (10%) */
+        :root{
+            --primary: #0b3d91;   /* royal blue - main surfaces (60%) */
+            --secondary: #b22234; /* royal red - accents/buttons (30%) */
+            --accent: #ffd166;    /* gold - micro accents (10%) */
+            --muted: #6b7280;
+            --card-bg: #ffffff;
+        }
+
+        body { font-family: 'Poppins', sans-serif; background: linear-gradient(180deg, var(--primary) 0%, #eaf1ff 100%); color:#0f1724; }
+        .navbar-brand { font-weight:700; letter-spacing:0.2px; color: white; }
+        .hero { padding: 80px 0; }
+        .hero-card { background: linear-gradient(135deg, rgba(178,34,52,0.08), rgba(11,61,145,0.06)); border-radius:18px; padding:40px; }
+        .btn-custom { padding: 12px 26px; font-weight: 600; border-radius: 999px; transition: 0.25s; }
+        .btn-primary { background: var(--secondary); border: none; color: white; } /* primary CTA is royal red */
+        .btn-primary:hover { transform: translateY(-3px); box-shadow: 0 12px 30px rgba(178,34,52,0.12); }
+        .btn-outline-secondary { border-color: rgba(255,255,255,0.85); color: white; background: transparent; }
+        .search-input { background: rgba(255,255,255,0.95); border-radius: 12px; box-shadow: 0 6px 18px rgba(15,23,42,0.06); }
+        .feature-card { background: var(--card-bg); border-radius: 12px; padding: 24px; box-shadow: 0 8px 26px rgba(15,23,42,0.06); transition: transform .25s; }
+        .feature-card:hover { transform: translateY(-6px); }
+        .icon-lg { font-size: 2.1rem; color: var(--secondary); }
+        .leaderboard { background: linear-gradient(180deg, #ffffff, #fbfdff); border-radius: 14px; padding: 20px; box-shadow: 0 10px 30px rgba(15,23,42,0.05); }
+        .lb-item { display:flex; align-items:center; gap:12px; padding:12px; border-radius:10px; transition:background .15s; }
+        .lb-item:hover { background: rgba(11,61,145,0.03); }
+        .avatar { width:48px; height:48px; border-radius:50%; object-fit:cover; border:2px solid #fff; box-shadow: 0 6px 18px rgba(15,23,42,0.06); }
+        footer { background: var(--primary); color: #f1f5f9; padding: 36px 0; }
+        .muted { color: var(--muted); }
+        @media (max-width: 768px) { .hero { padding:40px 0; } .hero-img { display:none; } }
     </style>
 </head>
 <body>
 
+    {{-- use header partial for consistent nav --}}
+    @include('partials.header')
+
     <!-- Hero Section -->
-    <section class="hero text-center">
+    <section class="hero">
         <div class="container">
-            <h1 class="display-3 fw-bold mb-4">Connect. Volunteer. <span class="text-warning">Change Lives.</span></h1>
-            <p class="lead mb-5">Join thousands of volunteers and organizations making a real impact.</p>
-            <div>
-                <a href="{{ route('register') }}" class="btn btn-primary btn-lg btn-custom me-3">Start Volunteering</a>
-                <a href="{{ route('register') }}?role=organization" class="btn btn-outline-light btn-lg btn-custom">Post Opportunities</a>
+            <div class="row align-items-center hero-card">
+                <div class="col-md-6">
+                    <h1 class="display-5 fw-bold mb-3">Connect with causes, build skills, and change lives.</h1>
+                    <p class="lead muted mb-4">Join a community of volunteers and organizations focused on making measurable social impact. Find flexible opportunities that fit your skills and schedule.</p>
+
+                    <div class="d-flex gap-2 mb-3">
+                        <a href="{{ route('register') }}" class="btn btn-primary btn-lg btn-custom">Start Volunteering</a>
+                        <a href="{{ route('register') }}?role=organization" class="btn btn-outline-secondary btn-lg btn-custom">Post Opportunities</a>
+                    </div>
+
+                    <!-- quick search -->
+                    <div class="mt-4">
+                        <form class="row g-2 align-items-center" role="search">
+                            <div class="col-sm-7">
+                                <input class="form-control search-input" type="search" placeholder="Search opportunities, skills or locations" aria-label="Search">
+                            </div>
+                            <div class="col-sm-3">
+                                <select class="form-select search-input">
+                                    <option value="">All categories</option>
+                                    <option>Education</option>
+                                    <option>Healthcare</option>
+                                    <option>Environment</option>
+                                </select>
+                            </div>
+                            <div class="col-sm-2 d-grid">
+                                <button class="btn btn-primary">Search</button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <div class="mt-4 muted small">
+                        <i class="bi bi-check2-circle text-success"></i> Verified organizations • <i class="bi bi-clock-history"></i> Flexible time • <i class="bi bi-award"></i> Certificates
+                    </div>
+
+                    @auth
+                    <div class="mt-3">
+                        <!-- Quick Profile update modal trigger -->
+                        <button class="btn btn-light btn-sm" data-bs-toggle="modal" data-bs-target="#quickProfileModal">
+                            Update Profile (Avatar & Skills)
+                        </button>
+                    </div>
+                    @endauth
+                </div>
+
+                <div class="col-md-6 text-end hero-img">
+                    <img src="https://images.unsplash.com/photo-1524504388940-b1c1722653e1?q=80&w=800&auto=format&fit=crop&crop=faces" alt="volunteer illustration" class="img-fluid rounded-3 shadow" style="max-height:360px; object-fit:cover;">
+                </div>
             </div>
         </div>
     </section>
 
-    <!-- Stats -->
+    <!-- Stats + Leaderboard row -->
     <section class="py-5">
-        <div class="container stats text-white text-center">
-            <div class="row">
-                <div class="col-md-3">
-                    <h2 class="display-4 fw-bold">500+</h2>
-                    <p>Active Volunteers</p>
-                </div>
-                <div class="col-md-3">
-                    <h2 class="display-4 fw-bold">120+</h2>
-                    <p>Organizations</p>
-                </div>
-                <div class="col-md-3">
-                    <h2 class="display-4 fw-bold">1,200+</h2>
-                    <p>Tasks Completed</p>
-                </div>
-                <div class="col-md-3">
-                    <h2 class="display-4 fw-bold">48</h2>
-                    <p>Countries</p>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Features -->
-    <section class="py-5 bg-white">
         <div class="container">
-            <div class="text-center mb-5">
-                <h2 class="fw-bold">Why Choose Us?</h2>
-            </div>
-            <div class="row g-4">
-                <div class="col-md-4">
-                    <div class="feature-card text-center">
-                        <i class="bi bi-search-heart icon-lg mb-3"></i>
-                        <h5>Find Meaningful Work</h5>
-                        <p>Browse verified opportunities that match your skills and passion.</p>
+            <div class="row gy-4">
+                <div class="col-lg-8">
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <div class="feature-card text-center">
+                                <h3 class="fw-bold mb-1">500+</h3>
+                                <p class="muted small mb-0">Active Volunteers</p>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="feature-card text-center">
+                                <h3 class="fw-bold mb-1">120+</h3>
+                                <p class="muted small mb-0">Organizations</p>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="feature-card text-center">
+                                <h3 class="fw-bold mb-1">1,200+</h3>
+                                <p class="muted small mb-0">Tasks Completed</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Why Choose Us -->
+                    <div id="features" class="mt-4">
+                        <h4 class="fw-bold mb-3">Why volunteers love VolunteerHub</h4>
+                        <div class="row g-3">
+                            <div class="col-md-4">
+                                <div class="feature-card text-center">
+                                    <i class="bi bi-search-heart icon-lg mb-3"></i>
+                                    <h6 class="mb-1">Find Meaningful Work</h6>
+                                    <p class="small muted mb-0">Opportunities tailored to your skills.</p>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="feature-card text-center">
+                                    <i class="bi bi-shield-check icon-lg mb-3"></i>
+                                    <h6 class="mb-1">Trusted & Secure</h6>
+                                    <p class="small muted mb-0">Organization verification and privacy-first approach.</p>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="feature-card text-center">
+                                    <i class="bi bi-trophy icon-lg mb-3"></i>
+                                    <h6 class="mb-1">Recognition & Badges</h6>
+                                    <p class="small muted mb-0">Earn badges for milestones and contributions.</p>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
-                <div class="col-md-4">
-                    <div class="feature-card text-center">
-                        <i class="bi bi-shield-check icon-lg mb-3"></i>
-                        <h5>Trusted & Secure</h5>
-                        <p>All organizations are verified. Your data is safe with us.</p>
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="feature-card text-center">
-                        <i class="bi bi-trophy icon-lg mb-3"></i>
-                        <h5>Earn Recognition</h5>
-                        <p>Get badges and certificates for your contributions.</p>
+
+                <!-- Leaderboard -->
+                <div class="col-lg-4">
+                    <div id="leaderboard" class="leaderboard">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <h5 class="mb-0 fw-bold">Top Volunteers</h5>
+                            <a href="{{ route('leaderboard') }}" class="small">View All</a>
+                        </div>
+
+                        <div class="list-group">
+                            @if(isset($leaderboard) && $leaderboard->count())
+                                @foreach($leaderboard->take(3) as $index => $vol)
+                                    <div class="lb-item list-group-item border-0">
+                                        <div class="me-2 position-relative">
+                                            @php
+                                                $avatarPath = $vol->avatar ? asset('storage/' . $vol->avatar) : "https://ui-avatars.com/api/?name=" . urlencode($vol->name) . "&background=0b3d91&color=fff";
+                                            @endphp
+                                            <img src="{{ $avatarPath }}" class="avatar" alt="{{ $vol->name }}">
+                                            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-warning">
+                                                #{{ $index + 1 }}
+                                            </span>
+                                        </div>
+                                        <div class="flex-grow-1">
+                                            <div class="d-flex justify-content-between align-items-center">
+                                                <div>
+                                                    <div class="fw-bold">{{ $vol->name }}</div>
+                                                    <div class="small muted">{{ Str::limit($vol->bio ?? ($vol->role ?? 'Volunteer'), 28) }}</div>
+                                                </div>
+                                                <div class="text-end">
+                                                    <div class="fw-bold">{{ $vol->points ?? 0 }}</div>
+                                                    <div class="small" style="color: var(--accent)">
+                                                        <i class="bi bi-award-fill"></i> {{ $vol->tasks_completed ?? 0 }} tasks
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                @endforeach
+                            @else
+                                <div class="text-center py-4 muted">
+                                    <i class="bi bi-people display-4"></i>
+                                    <p class="mb-0">Top volunteers coming soon — join to be featured!</p>
+                                </div>
+                            @endif
+
+                            <div class="text-center mt-3">
+                                <a href="{{ route('leaderboard') }}" class="btn btn-outline-primary btn-sm w-100">View Full Leaderboard</a>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -92,19 +207,46 @@
     </section>
 
     <!-- CTA -->
-    <section class="py-5 text-center text-white">
+    <section class="py-5 text-center">
         <div class="container">
-            <h2 class="fw-bold mb-4">Make a Difference Now</h2>
-            <a href="{{ route('register') }}" class="btn btn-light btn-lg btn-custom">Join Now - It's Free!</a>
+            <h2 class="fw-bold mb-3">Ready to Make a Difference?</h2>
+            <p class="muted mb-4">Sign up and explore opportunities near you. Get recognized for every hour you give.</p>
+            <a href="{{ route('register') }}" class="btn btn-primary btn-lg btn-custom">Join Now - It's Free!</a>
         </div>
     </section>
 
-    <!-- Footer -->
-    <footer class="text-center">
-        <div class="container">
-            <p>&copy; {{ date('Y') }} Volunteer Platform. Made with <i class="bi bi-heart-fill text-danger"></i> for social good.</p>
+    <!-- Quick Profile Modal (authenticated users) -->
+    @auth
+    <div class="modal fade" id="quickProfileModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <form action="{{ route('profile.update') }}" method="POST" enctype="multipart/form-data" class="modal-content">
+                @csrf @method('PUT')
+                <div class="modal-header">
+                    <h5 class="modal-title">Update Avatar & Skills</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3 text-center">
+                        <img src="{{ Auth::user()->avatar ? asset('storage/' . Auth::user()->avatar) : asset('default-avatar.png') }}" class="rounded-circle mb-2" style="width:90px;height:90px;object-fit:cover">
+                        <input type="file" name="avatar" class="form-control mt-2" accept="image/*">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Skills (comma-separated)</label>
+                        <input type="text" name="skills_input" class="form-control" value="{{ Auth::user()->skills ? implode(', ', Auth::user()->skills) : '' }}" placeholder="e.g. teaching, fundraising, first aid">
+                        <div class="form-text">Add a few skills to improve matching.</div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-primary">Save Profile</button>
+                </div>
+            </form>
         </div>
-    </footer>
+    </div>
+    @endauth
+
+    {{-- use footer partial --}}
+    @include('partials.footer')
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>

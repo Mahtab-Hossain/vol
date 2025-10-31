@@ -43,15 +43,22 @@ class User extends Authenticatable
     ];
 
     /**
-     * Get the attributes that should be cast.
+     * The attributes that should be cast.
      *
-     * @return array<string, string>
+     * @var array<string, string>
      */
-    protected function casts(): array
+    protected $casts = [
+        'email_verified_at' => 'datetime',
+        'password' => 'hashed',
+        'skills' => 'array',
+        'badges' => 'array',
+        'points' => 'integer',
+        'tasks_completed' => 'integer',
+        'verified' => 'boolean',
+    ];
+
+    public function opportunities()
     {
-        return [
-            'email_verified_at' => 'datetime',
-            'password' => 'hashed',
-        ];
+        return $this->hasMany(Opportunity::class, 'organization_id');
     }
 }
