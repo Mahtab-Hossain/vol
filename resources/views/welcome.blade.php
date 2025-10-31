@@ -94,7 +94,7 @@
     <!-- CTA -->
     <section class="py-5 text-center text-white">
         <div class="container">
-            <h2 class="fw-bold mb-4">Ready to Make a Difference?</h2>
+            <h2 class="fw-bold mb-4">Make a Difference Now</h2>
             <a href="{{ route('register') }}" class="btn btn-light btn-lg btn-custom">Join Now - It's Free!</a>
         </div>
     </section>
