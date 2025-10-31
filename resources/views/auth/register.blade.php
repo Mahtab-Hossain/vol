@@ -9,6 +9,13 @@
                 <h4 class="mb-0">Register</h4>
             </div>
             <div class="card-body">
+                <div class="mb-3 text-center">
+                    <a id="googleRegisterBtn" href="{{ route('login.google') }}" class="btn btn-outline-danger w-100 mb-2">
+                        <i class="bi bi-google me-2"></i> Sign up with Google
+                    </a>
+                    <div class="small text-muted">Or use your email to register</div>
+                </div>
+
                 <form method="POST" action="{{ route('register') }}">
                     @csrf
                     <div class="mb-3">
@@ -29,11 +36,12 @@
                     </div>
                     <div class="mb-3">
                         <label>Role</label>
-                        <select name="role" class="form-select" required>
+                        <select id="roleSelect" name="role" class="form-select" required>
                             <option value="volunteer">Volunteer</option>
                             <option value="organization">Organization</option>
                         </select>
                     </div>
+
                     <button type="submit" class="btn btn-success w-100">Register</button>
                 </form>
                 <div class="text-center mt-3">
@@ -43,4 +51,17 @@
         </div>
     </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const googleBtn = document.getElementById('googleRegisterBtn');
+    const roleSelect = document.getElementById('roleSelect');
+
+    googleBtn.addEventListener('click', function (e) {
+        e.preventDefault();
+        const role = encodeURIComponent(roleSelect.value || 'volunteer');
+        window.location = this.href + '?role=' + role;
+    });
+});
+</script>
 @endsection

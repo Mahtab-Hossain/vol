@@ -1,6 +1,11 @@
 <div class="card shadow-sm">
     <div class="card-body text-center">
-        <img src="{{ $user->avatar ? asset('storage/' . $user->avatar) : asset('default-avatar.png') }}" class="rounded-circle mb-3" style="width:110px;height:110px;object-fit:cover">
+        @php
+            $avatarSrc = $user->avatar 
+                ? (strpos($user->avatar, 'http') === 0 ? $user->avatar : asset('storage/' . $user->avatar))
+                : asset('default-avatar.png');
+        @endphp
+        <img src="{{ $avatarSrc }}" class="rounded-circle mb-3" style="width:110px;height:110px;object-fit:cover">
         <h5 class="mb-0">{{ $user->name }}</h5>
         <small class="text-muted d-block mb-3">{{ ucfirst($user->role) }}</small>
 

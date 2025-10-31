@@ -20,7 +20,7 @@
         body { font-family: 'Poppins', sans-serif; background: linear-gradient(180deg, var(--primary) 0%, #eaf1ff 100%); color:#0f1724; }
         .navbar-brand { font-weight:700; letter-spacing:0.2px; color: white; }
         .hero { padding: 80px 0; }
-        .hero-card { background: linear-gradient(135deg, rgba(178,34,52,0.08), rgba(11,61,145,0.06)); border-radius:18px; padding:40px; }
+        .hero-card { background: #ffffff; border-radius:18px; padding:40px; box-shadow: 0 10px 30px rgba(11,61,145,0.06); color: #0f1724; }
         .btn-custom { padding: 12px 26px; font-weight: 600; border-radius: 999px; transition: 0.25s; }
         .btn-primary { background: var(--secondary); border: none; color: white; } /* primary CTA is royal red */
         .btn-primary:hover { transform: translateY(-3px); box-shadow: 0 12px 30px rgba(178,34,52,0.12); }
@@ -37,6 +37,14 @@
         .muted { color: var(--muted); }
         @media (max-width: 768px) { .hero { padding:40px 0; } .hero-img { display:none; } }
     </style>
+    @section('meta')
+        <meta name="description" content="VolunteerHub — connect with causes, find opportunities and earn recognition.">
+        <meta name="keywords" content="volunteer, opportunities, nonprofit, community, skills">
+        <meta property="og:title" content="VolunteerHub — Make a Difference">
+        <meta property="og:description" content="Join volunteers and organizations making a real impact.">
+        <meta property="og:image" content="{{ asset('logo.png') }}">
+        <link rel="canonical" href="{{ url()->current() }}">
+    @endsection
 </head>
 <body>
 
@@ -49,11 +57,11 @@
             <div class="row align-items-center hero-card">
                 <div class="col-md-6">
                     <h1 class="display-5 fw-bold mb-3">Connect with causes, build skills, and change lives.</h1>
-                    <p class="lead muted mb-4">Join a community of volunteers and organizations focused on making measurable social impact. Find flexible opportunities that fit your skills and schedule.</p>
+                    <p class="lead subtitle mb-4">Join a community of volunteers and organizations focused on making measurable social impact. Find flexible opportunities that fit your skills and schedule.</p>
 
                     <div class="d-flex gap-2 mb-3">
                         <a href="{{ route('register') }}" class="btn btn-primary btn-lg btn-custom">Start Volunteering</a>
-                        <a href="{{ route('register') }}?role=organization" class="btn btn-outline-secondary btn-lg btn-custom">Post Opportunities</a>
+                        <a href="{{ route('register') }}?role=organization" class="btn btn-outline-primary btn-lg btn-custom">Post Opportunities</a>
                     </div>
 
                     <!-- quick search -->
@@ -79,19 +87,14 @@
                     <div class="mt-4 muted small">
                         <i class="bi bi-check2-circle text-success"></i> Verified organizations • <i class="bi bi-clock-history"></i> Flexible time • <i class="bi bi-award"></i> Certificates
                     </div>
-
-                    @auth
-                    <div class="mt-3">
-                        <!-- Quick Profile update modal trigger -->
-                        <button class="btn btn-light btn-sm" data-bs-toggle="modal" data-bs-target="#quickProfileModal">
-                            Update Profile (Avatar & Skills)
-                        </button>
-                    </div>
-                    @endauth
                 </div>
 
                 <div class="col-md-6 text-end hero-img">
-                    <img src="https://images.unsplash.com/photo-1524504388940-b1c1722653e1?q=80&w=800&auto=format&fit=crop&crop=faces" alt="volunteer illustration" class="img-fluid rounded-3 shadow" style="max-height:360px; object-fit:cover;">
+                    @if(file_exists(public_path('logo.png')))
+                        <img src="{{ asset('logo.png') }}" alt="Logo" class="img-fluid rounded-3 shadow" style="max-height:220px; object-fit:contain;">
+                    @else
+                        <img src="https://images.unsplash.com/photo-1524504388940-b1c1722653e1?q=80&w=800&auto=format&fit=crop&crop=faces" alt="volunteer illustration" class="img-fluid rounded-3 shadow" style="max-height:360px; object-fit:cover;">
+                    @endif
                 </div>
             </div>
         </div>
@@ -163,11 +166,13 @@
                         <div class="list-group">
                             @if(isset($leaderboard) && $leaderboard->count())
                                 @foreach($leaderboard->take(3) as $index => $vol)
+                                    @php
+                                        $avatarPath = $vol->avatar 
+                                            ? (strpos($vol->avatar, 'http') === 0 ? $vol->avatar : asset('storage/' . $vol->avatar))
+                                            : "https://ui-avatars.com/api/?name=" . urlencode($vol->name) . "&background=0b3d91&color=fff";
+                                    @endphp
                                     <div class="lb-item list-group-item border-0">
                                         <div class="me-2 position-relative">
-                                            @php
-                                                $avatarPath = $vol->avatar ? asset('storage/' . $vol->avatar) : "https://ui-avatars.com/api/?name=" . urlencode($vol->name) . "&background=0b3d91&color=fff";
-                                            @endphp
                                             <img src="{{ $avatarPath }}" class="avatar" alt="{{ $vol->name }}">
                                             <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-warning">
                                                 #{{ $index + 1 }}
@@ -214,36 +219,6 @@
             <a href="{{ route('register') }}" class="btn btn-primary btn-lg btn-custom">Join Now - It's Free!</a>
         </div>
     </section>
-
-    <!-- Quick Profile Modal (authenticated users) -->
-    @auth
-    <div class="modal fade" id="quickProfileModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog">
-            <form action="{{ route('profile.update') }}" method="POST" enctype="multipart/form-data" class="modal-content">
-                @csrf @method('PUT')
-                <div class="modal-header">
-                    <h5 class="modal-title">Update Avatar & Skills</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body">
-                    <div class="mb-3 text-center">
-                        <img src="{{ Auth::user()->avatar ? asset('storage/' . Auth::user()->avatar) : asset('default-avatar.png') }}" class="rounded-circle mb-2" style="width:90px;height:90px;object-fit:cover">
-                        <input type="file" name="avatar" class="form-control mt-2" accept="image/*">
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Skills (comma-separated)</label>
-                        <input type="text" name="skills_input" class="form-control" value="{{ Auth::user()->skills ? implode(', ', Auth::user()->skills) : '' }}" placeholder="e.g. teaching, fundraising, first aid">
-                        <div class="form-text">Add a few skills to improve matching.</div>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Close</button>
-                    <button type="submit" class="btn btn-primary">Save Profile</button>
-                </div>
-            </form>
-        </div>
-    </div>
-    @endauth
 
     {{-- use footer partial --}}
     @include('partials.footer')

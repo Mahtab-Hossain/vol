@@ -8,110 +8,31 @@
         <p class="lead text-muted">Making volunteering simple and rewarding</p>
     </div>
 
-    <!-- For Volunteers -->
     <div class="row mb-5">
-        <div class="col-lg-12">
-            <h3 class="mb-4">For Volunteers</h3>
-            <div class="row g-4">
-                <div class="col-md-3">
-                    <div class="card h-100 border-0 shadow-sm">
-                        <div class="card-body text-center">
-                            <div class="display-4 text-primary mb-3">
-                                <i class="bi bi-person-plus"></i>
-                            </div>
-                            <h5>1. Sign Up</h5>
-                            <p class="text-muted small">Create your volunteer profile and add your skills</p>
-                        </div>
+        <div class="col-12">
+            <div id="steps" class="d-flex gap-3 flex-wrap justify-content-center">
+                @php
+                    $volSteps = [
+                        ['icon'=>'person-plus','title'=>'Sign Up','text'=>'Create your profile. Add skills later in your profile.'],
+                        ['icon'=>'search','title'=>'Find','text'=>'Search opportunities that match your skills.'],
+                        ['icon'=>'check2-circle','title'=>'Complete','text'=>'Join and complete tasks.'],
+                        ['icon'=>'award','title'=>'Earn','text'=>'Get badges, points and certificates.'],
+                    ];
+                @endphp
+                @foreach($volSteps as $i => $s)
+                    <div class="step-card text-center p-4 rounded shadow-sm" data-index="{{ $i }}" style="width:220px; cursor:pointer; transition: transform .2s;">
+                        <div class="display-4 text-primary mb-2"><i class="bi bi-{{ $s['icon'] }}"></i></div>
+                        <h6 class="fw-bold">{{ $s['title'] }}</h6>
+                        <p class="small text-muted">{{ $s['text'] }}</p>
                     </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="card h-100 border-0 shadow-sm">
-                        <div class="card-body text-center">
-                            <div class="display-4 text-primary mb-3">
-                                <i class="bi bi-search"></i>
-                            </div>
-                            <h5>2. Find Opportunities</h5>
-                            <p class="text-muted small">Browse and claim volunteer opportunities that match your interests</p>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="card h-100 border-0 shadow-sm">
-                        <div class="card-body text-center">
-                            <div class="display-4 text-primary mb-3">
-                                <i class="bi bi-check2-circle"></i>
-                            </div>
-                            <h5>3. Complete Tasks</h5>
-                            <p class="text-muted small">Make a difference by completing volunteer work</p>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="card h-100 border-0 shadow-sm">
-                        <div class="card-body text-center">
-                            <div class="display-4 text-primary mb-3">
-                                <i class="bi bi-award"></i>
-                            </div>
-                            <h5>4. Earn & Grow</h5>
-                            <p class="text-muted small">Earn certificates, badges, and recognition for your impact</p>
-                        </div>
-                    </div>
-                </div>
+                @endforeach
             </div>
         </div>
     </div>
 
-    <!-- For Organizations -->
-    <div class="row">
-        <div class="col-lg-12">
-            <h3 class="mb-4">For Organizations</h3>
-            <div class="row g-4">
-                <div class="col-md-3">
-                    <div class="card h-100 border-0 shadow-sm">
-                        <div class="card-body text-center">
-                            <div class="display-4 text-success mb-3">
-                                <i class="bi bi-building"></i>
-                            </div>
-                            <h5>1. Register</h5>
-                            <p class="text-muted small">Create your organization profile and get verified</p>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="card h-100 border-0 shadow-sm">
-                        <div class="card-body text-center">
-                            <div class="display-4 text-success mb-3">
-                                <i class="bi bi-plus-circle"></i>
-                            </div>
-                            <h5>2. Post Opportunities</h5>
-                            <p class="text-muted small">Create volunteer opportunities and describe needed skills</p>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="card h-100 border-0 shadow-sm">
-                        <div class="card-body text-center">
-                            <div class="display-4 text-success mb-3">
-                                <i class="bi bi-people"></i>
-                            </div>
-                            <h5>3. Connect</h5>
-                            <p class="text-muted small">Connect with skilled volunteers who match your needs</p>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="card h-100 border-0 shadow-sm">
-                        <div class="card-body text-center">
-                            <div class="display-4 text-success mb-3">
-                                <i class="bi bi-star"></i>
-                            </div>
-                            <h5>4. Recognize</h5>
-                            <p class="text-muted small">Award certificates and provide feedback to volunteers</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+    <div id="detail" class="text-center mb-5">
+        <h3 id="detailTitle">Sign Up</h3>
+        <p id="detailText" class="text-muted">Create your profile. Add your skills to improve matching.</p>
     </div>
 
     <!-- CTA -->
@@ -121,4 +42,38 @@
         <a href="{{ route('register') }}?role=organization" class="btn btn-success btn-lg">Register Organization</a>
     </div>
 </div>
+
+@section('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const cards = document.querySelectorAll('.step-card');
+    const title = document.getElementById('detailTitle');
+    const text = document.getElementById('detailText');
+
+    cards.forEach(card => {
+        card.addEventListener('mouseenter', () => card.style.transform = 'translateY(-6px) scale(1.02)');
+        card.addEventListener('mouseleave', () => card.style.transform = '');
+        card.addEventListener('click', () => {
+            const idx = parseInt(card.dataset.index, 10);
+            // Use the content from the card to populate detail area
+            title.innerText = card.querySelector('h6').innerText;
+            text.innerText = card.querySelector('p').innerText;
+            // highlight selected
+            cards.forEach(c => c.classList.remove('border', 'border-2', 'border-primary'));
+            card.classList.add('border', 'border-2', 'border-primary');
+            // smooth scroll detail into view
+            card.scrollIntoView({ behavior: 'smooth', inline: 'center' });
+        });
+    });
+
+    // initial highlight
+    if (cards[0]) cards[0].click();
+});
+</script>
+@endsection
+
+<style>
+.step-card:hover { box-shadow: 0 12px 30px rgba(11,61,145,0.08); }
+#detail { transition: all .25s ease; }
+</style>
 @endsection

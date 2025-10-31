@@ -13,10 +13,12 @@
                 </div>
                 <div class="card-body">
                     @forelse($volunteers as $index => $vol)
+                        @php
+                            $avatar = $vol->avatar ? (strpos($vol->avatar,'http')===0 ? $vol->avatar : asset('storage/' . $vol->avatar)) : asset('default-avatar.png');
+                        @endphp
                         <div class="d-flex align-items-center mb-3 p-2 rounded {{ $index < 3 ? 'bg-light' : '' }}">
                             <div class="position-relative me-3">
-                                <img src="{{ $vol->avatar ? asset('storage/' . $vol->avatar) : asset('default-avatar.png') }}" 
-                                     class="rounded-circle" style="width:50px;height:50px;object-fit:cover">
+                                <img src="{{ $avatar }}" class="rounded-circle" style="width:50px;height:50px;object-fit:cover">
                                 @if($index < 3)
                                     <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-warning">
                                         #{{ $index + 1 }}
@@ -50,10 +52,12 @@
                 </div>
                 <div class="card-body">
                     @forelse($organizations as $index => $org)
+                        @php
+                            $avatar = $org->avatar ? (strpos($org->avatar,'http')===0 ? $org->avatar : asset('storage/' . $org->avatar)) : asset('default-avatar.png');
+                        @endphp
                         <div class="d-flex align-items-center mb-3 p-2 rounded {{ $index < 3 ? 'bg-light' : '' }}">
                             <div class="position-relative me-3">
-                                <img src="{{ $org->avatar ? asset('storage/' . $org->avatar) : asset('default-avatar.png') }}" 
-                                     class="rounded-circle" style="width:50px;height:50px;object-fit:cover">
+                                <img src="{{ $avatar }}" class="rounded-circle" style="width:50px;height:50px;object-fit:cover">
                                 @if($index < 3)
                                     <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-warning">
                                         #{{ $index + 1 }}

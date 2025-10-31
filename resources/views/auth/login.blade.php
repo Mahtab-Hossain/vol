@@ -9,6 +9,13 @@
                 <h4 class="mb-0">Login</h4>
             </div>
             <div class="card-body">
+                <div class="mb-3 text-center">
+                    <a href="{{ route('login.google') }}" class="btn btn-outline-danger w-100 mb-3">
+                        <i class="bi bi-google me-2"></i> Sign in with Google
+                    </a>
+                    <div class="small text-muted">Or sign in with your email</div>
+                </div>
+
                 <form method="POST" action="{{ route('login') }}">
                     @csrf
                     <div class="mb-3">

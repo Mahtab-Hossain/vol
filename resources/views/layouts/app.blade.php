@@ -11,38 +11,21 @@
         /* small theme polish */
         body { background: #f7f9fb; }
         .navbar-brand { font-weight:700; letter-spacing: .2px; }
+        .form-control:focus { box-shadow: 0 6px 18px rgba(11,61,145,0.08); border-color: #0b3d91; }
+        .btn-primary { background: #0b3d91; border: none; }
     </style>
+    <meta name="description" content="@yield('meta_description', 'VolunteerHub - connect volunteers with organizations for social impact.')">
+    <meta name="keywords" content="@yield('meta_keywords', 'volunteer,nonprofit,opportunities,community')">
+    <meta property="og:site_name" content="{{ config('app.name', 'Volunteer Platform') }}">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="{{ url()->current() }}">
+    <meta property="og:image" content="{{ asset('logo.png') }}">
+    <meta name="robots" content="index, follow">
+    @yield('meta')
 </head>
 <body class="bg-light">
-    <!-- Navbar -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm">
-        <div class="container">
-            <a class="navbar-brand fw-bold" href="{{ route('home') }}">Volunteer Platform</a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="mainNav">
-                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                    <li class="nav-item"><a class="nav-link" href="{{ route('opportunities.index') }}">Opportunities</a></li>
-                    @auth
-                        <li class="nav-item"><a class="nav-link" href="{{ route('profile') }}">My Profile</a></li>
-                    @endauth
-                </ul>
-                <div class="d-flex align-items-center">
-                    @auth
-                        <span class="navbar-text me-3 text-white">{{ Auth::user()->name }}</span>
-                        <form method="POST" action="{{ route('logout') }}">
-                            @csrf
-                            <button type="submit" class="btn btn-outline-light btn-sm">Logout</button>
-                        </form>
-                    @else
-                        <a href="{{ route('login') }}" class="btn btn-outline-light me-2">Login</a>
-                        <a href="{{ route('register') }}" class="btn btn-light">Register</a>
-                    @endauth
-                </div>
-            </div>
-        </div>
-    </nav>
+    {{-- Replace inline navbar with header partial so logo appears everywhere --}}
+    @include('partials.header')
 
     <!-- Main Content -->
     <main class="container my-5">
